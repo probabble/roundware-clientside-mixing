@@ -1,0 +1,53 @@
+{{#leaflet-map bounds=bounds as |layers|}}
+  {{layers.tile url=tileSource}}
+  {{#each geoAudioMixing.assets as |asset|}}
+    {{layers.marker lat=asset.latitude lng=asset.longitude draggable=false}}
+  {{/each}}
+  {{#each geoAudioMixing.speakers as |speaker|}}
+    {{layers.geoJSON geoJSON=speaker.geom}}
+    {{layers.geoJSON color="red" geoJSON=speaker.boundaryLine}}
+    {{layers.geoJSON color="yellow" geoJSON=speaker.attenuationBorder.geometry}}
+
+  {{/each}}
+    {{layers.marker draggable=true lat=geoAudioMixing.listenerLocation.[0] lng=geoAudioMixing.listenerLocation.[1] onDragend=(action "updateListenerLocation")}}
+{{!-- Specify child layer components here --}}
+{{/leaflet-map}}
+
+<box fit>
+  <table>
+    <tr>
+      <th>source</th>
+      <th>attenuation</th>
+      <th>volume</th>
+    </tr>
+    {{#each geoAudioMixing.activeSources as |source|}}
+      <tr>
+        <td>{{source.code}}</td>
+        <td>{{percentage source.attenuation decimals=1}}</td>
+        <td>{{percentage source.playingVolume decimals=1}}</td>
+      </tr>
+    {{/each}}
+  </table>
+</box>
+
+<box fit class="playlist">
+  <h3>playlist</h3>
+
+  <table>
+    <tr>
+      <th>id</th>
+      <th>file</th>
+      <th>priority</th>
+      <th>duration</th>
+    </tr>
+    {{#each geoAudioMixing.playlist as |asset|}}
+      <tr>
+        <td>{{asset.id}}</td>
+        <td>{{asset.filename}}</td>
+        <td>{{asset.weight}}</td>
+        <td>{{asset.duration}}</td>
+      </tr>
+    {{/each}}
+  </table>
+</box>
+

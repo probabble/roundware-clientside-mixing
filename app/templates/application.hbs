@@ -1,5 +1,24 @@
-{{!-- The following component displays Ember's default welcome message. --}}
-{{welcome-page}}
-{{!-- Feel free to remove this! --}}
+<screen>
+  <page>
+    <centered fit class="navbar">
+      <hbox>
+        <centered xs="10" sm="5">
+          <h1>Roundware</h1>
+        </centered>
+        <centered xs="10" sm="5">
+          <h3>contributory audio</h3>
+        </centered>
+        <centered xs="10" sm="2">
+          {{#if session.isAuthenticated}}
+            <button {{action 'invalidateSession'}}>Logout</button>
+          {{/if}}
+        </centered>
+      </hbox>
+    </centered>
 
-{{outlet}}
+    <box fill align="center">
+      {{outlet}}
+    </box>
+
+  </page>
+</screen>

@@ -1,0 +1,12 @@
+<box>
+
+<h5>{{yield}}</h5>
+<vbox>
+{{#each assets as |asset|}}
+  <box>
+    <p>description: {{if asset.description asset.description 'none'}}</p>
+    <p>file: {{if asset.filename asset.filename 'none'}}</p>
+  </box>
+{{/each}}
+</vbox>
+</box>
