@@ -105,39 +105,53 @@ export default Service.extend({
 
           onload() {
             console.log('Loaded!');
+            source.notifyPropertyChange('howlerSound');
           },
 
           onvolume() {
             source.set("playingVolume", sound.volume(soundId));
+            source.notifyPropertyChange('howlerSound');
+
           },
 
           onfade() {
             console.log('Faded!');
+            source.notifyPropertyChange('howlerSound');
+
           },
 
           onplay(soundId) {
+            source.set('soundId', soundId);
             sound.fade(0, volume, 1000, soundId);
             console.log(`Playing ${sound.src}`);
             playingSources.push(source);
+            source.notifyPropertyChange('howlerSound');
           },
 
           onend() {
             console.log('Finished!');
             playingSources.pop(source);
+            source.notifyPropertyChange('howlerSound');
           },
 
           onpause() {
             console.log('Paused!');
             playingSources.pop(source);
+            source.notifyPropertyChange('howlerSound');
+
           },
 
           onstop() {
             console.log('Stopped!');
             playingSources.pop(source);
+            source.notifyPropertyChange('howlerSound');
+
           },
 
           onloaderror() {
-            console.log("Couldn't Load Source")
+            console.log("Couldn't Load Source");
+            source.notifyPropertyChange('howlerSound');
+
           },
 
           format: ['mp3',]
@@ -148,7 +162,8 @@ export default Service.extend({
           sound.play();
         });
 
-        source.set('howlerSound', sound);
+        Ember.set(sound, 'sourceObject', `speaker:${source.get('id')}`);
+
       }
     })
   })

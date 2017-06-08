@@ -5,6 +5,7 @@ import turf from 'npm:@turf/turf';
 const {attr, Model} = DS;
 
 export default Model.extend({
+
   active: attr('boolean'),
   code: attr(),
   maxvolume: attr('number'),
@@ -46,14 +47,16 @@ export default Model.extend({
   },
 
   attenuationPct: null,
+  _howlerSound: null,
 
-  howlerSound: null,
-
-  soundId: Ember.computed.alias('howlerSound._sounds.firstObject._id'),
-
-  playingVolume: Ember.computed('howlerSound._sounds.@each', 'soundId', function() {
-    return this.get('howlerSound').volume(this.get('soundId'));
+  howlerSound: Ember.computed(function() {
+    return window.Howler._howls.filter(howl => {
+      return howl.sourceObject === `speaker:${this.get('id')}`
+    }).get('firstObject');
   }),
+
+  soundId: null,
+  playingVolume: null,
 
   volume: Ember.computed('attenuation', 'minvolume', 'maxvolume', function() {
 
