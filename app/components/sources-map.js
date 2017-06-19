@@ -42,6 +42,27 @@ export default Ember.Component.extend({
       Ember.setProperties(mixer, {
         location: [location.lat, location.lng]
       });
+    },
+    updateGeom(obj,  e) {
+      e.target.eachLayer(layer => {
+        obj.set('shape', layer.editor.feature.toGeoJSON().geometry);
+      })
+    },
+    toggleEditing(obj, e) {
+      e.target.eachLayer(layer => {
+        // if we are exiting the editing state, update the source object
+        layer.toggleEdit();
+        // layer.on('editable:dragend', function() {
+        //
+        // });
+        // layer.on('editable:editing', function() {
+        // });
+      });
+    },
+    notifyEdit(e) {
+      e.target.eachLayer(layer => {
+        Ember.get(layer, 'properties.id')
+      });
     }
   }
 });

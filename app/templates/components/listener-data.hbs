@@ -1,1 +1,37 @@
-{{yield}}
+<box fit>
+  <table>
+    <tr>
+      <th>source</th>
+      <th>attenuation</th>
+      <th>volume</th>
+    </tr>
+    {{#each geoAudioMixing.activeSources as |source|}}
+      <tr>
+        <td>{{source.code}}</td>
+        <td>{{percentage source.attenuation decimals=1}}</td>
+        <td>{{percentage source.playingVolume decimals=1}}</td>
+      </tr>
+    {{/each}}
+  </table>
+</box>
+
+<box fit class="playlist">
+  <h3>playlist</h3>
+
+  <table>
+    <tr>
+      <th>id</th>
+      <th>file</th>
+      <th>priority</th>
+      <th>duration</th>
+    </tr>
+    {{#each geoAudioMixing.playlist as |asset|}}
+      <tr>
+        <td>{{asset.id}}</td>
+        <td>{{asset.filename}}</td>
+        <td>{{asset.weight}}</td>
+        <td>{{asset.duration}}</td>
+      </tr>
+    {{/each}}
+  </table>
+</box>

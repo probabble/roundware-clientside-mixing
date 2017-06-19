@@ -9,6 +9,7 @@ export default Route.extend(AuthenticatedRouteMixin, {
 
   model(params) {
     return RSVP.hash({
+      projects: this.store.findAll('project'), // , {session_id: 1}).get('firstObject'),
       assets: this.store.findAll('asset'),
       speakers: this.store.findAll('speaker')
     });

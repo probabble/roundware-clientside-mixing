@@ -30,7 +30,13 @@ module.exports = function(environment) {
     // ENV.APP.LOG_TRANSITIONS = true;
     // ENV.APP.LOG_TRANSITIONS_INTERNAL = true;
     // ENV.APP.LOG_VIEW_LOOKUPS = true;
+
+    // home
     ENV.APP.API_HOST = 'http://192.168.1.64:8888';
+    // other kind of network
+    // ENV.APP.API_HOST = 'http://172.20.10.2:8888';
+
+
   }
 
   if (environment === 'test') {

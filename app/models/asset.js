@@ -27,11 +27,71 @@ export default DS.Model.extend({
   tag_ids: attr(),
   session_id: attr(),
 
+  uri: attr(),
+
   //
   playCount: 0,
 
+  howlerSound: Ember.computed(function() {
+
+    // look up the howler sound from the Howler global
+    let sound = window.Howler._howls.filter(howl => {
+      return howl.sourceObject === `asset:${this.get('id')}`
+    }).get('firstObject');
+
+    if (!sound) {
+      // if it doesn't already exist, return a new Howler sound
+      let source = this;
+      sound = new window.Howl({
+        src: [source.get('file')],
+        // preload: true,
+        // html5: true,
+        loop: false,
+        autoplay: false,
+
+        onload() {
+          source.notifyPropertyChange('howlerSound');
+        },
+
+        onvolume() {
+          source.set("playingVolume", sound.volume(source.get('soundId')));
+          source.notifyPropertyChange('howlerSound');
+        },
+
+        onfade() {
+          source.notifyPropertyChange('howlerSound');
+        },
+
+        onplay(soundId) {
+          source.set('soundId', soundId);
+          source.notifyPropertyChange('howlerSound');
+        },
+
+        onend() {
+          source.notifyPropertyChange('howlerSound');
+        },
+
+        onpause() {
+          source.notifyPropertyChange('howlerSound');
+        },
+
+        onstop() {
+          source.notifyPropertyChange('howlerSound');
+        },
+
+        onloaderror() {
+          source.notifyPropertyChange('howlerSound');
+        },
+
+        format: ['mp3',]
+      });
+      Ember.set(sound, 'sourceObject', `asset:${source.get('id')}`);
+    }
+    return sound;
+  }),
+
   point: Ember.computed('latitude', 'longitude', function() {
-    return turf.point([this.get('latitude'), this.get('longitude')]);
+    return turf.point([this.get('longitude'), this.get('latitude')]);
   }),
 
   distance: Ember.computed('point', 'geoAudioMixing.locationPoint', function() {

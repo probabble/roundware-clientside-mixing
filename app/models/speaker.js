@@ -3,6 +3,7 @@ import Ember from 'ember';
 import turf from 'npm:@turf/turf';
 
 const {attr, Model} = DS;
+const {computed, inject} = Ember;
 
 export default Model.extend({
 
@@ -18,19 +19,36 @@ export default Model.extend({
   attenuation_border: attr(),
   project_id: attr(),
 
-  mixer: Ember.inject.service('geoAudioMixing'),
-
-  geom: Ember.computed('shape', function() {
-    return turf.multiPolygon(this.get('shape.coordinates'));
+  geoJSON: computed('shape', 'active', 'uri', 'backupuri', 'maxvolume', 'minvolume', 'code', 'project_id', {
+    get(key) {
+      return {
+        type: 'Feature',
+        properties: {
+          active: this.get('active'),
+          uri: this.get('uri'),
+          backupuri: this.get('backupuri'),
+          maxvolume: this.get('maxvolume'),
+          minvolume: this.get('minvolume'),
+          code: this.get('code'),
+          project_id: this.get('project_id')
+        },
+        geometry: this.get('shape')
+      };
+    },
+    set(key, value) {
+      this.set('shape', value.geometry);
+    }
   }),
 
-  boundaryLine: Ember.computed('geom', function() {
-    let geom = this.get("geom");
+  mixer: inject.service('geoAudioMixing'),
+
+  boundaryLine: computed('shape', function() {
+    let geom = this.get("shape");
     return turf.polygonToLineString(geom);
   }),
 
-  attenuationBorder: Ember.computed('boundaryLine', function() {
-     let geom = this.get('geom');
+  attenuationBorder: computed('shape', 'attenuation_distance', function() {
+     let geom = this.get('shape');
      return turf.buffer(geom, this.get('attenuation_distance') * -1, 'meters')
   }),
 
@@ -49,7 +67,7 @@ export default Model.extend({
   attenuationPct: null,
   _howlerSound: null,
 
-  howlerSound: Ember.computed(function() {
+  howlerSound: computed(function() {
     return window.Howler._howls.filter(howl => {
       return howl.sourceObject === `speaker:${this.get('id')}`
     }).get('firstObject');
@@ -58,7 +76,7 @@ export default Model.extend({
   soundId: null,
   playingVolume: null,
 
-  volume: Ember.computed('attenuation', 'minvolume', 'maxvolume', function() {
+  volume: computed('attenuation', 'minvolume', 'maxvolume', function() {
 
     let min = this.get('minvolume'),
         max = this.get('maxvolume'),
@@ -68,15 +86,15 @@ export default Model.extend({
 
   }),
 
-  isActive: Ember.computed('shape', 'mixer.locationPoint', function() {
-    return turf.inside(this.get('mixer.locationPoint'), this.get('geom'));
+  isActive: computed('shape', 'mixer.locationPoint', function() {
+    return turf.inside(this.get('mixer.locationPoint'), this.get('shape'));
   }),
 
-  isAttenuated: Ember.computed('shape', 'attenuationBorder', 'mixer.locationPoint', function() {
+  isAttenuated: computed('attenuationBorder', 'mixer.locationPoint', function() {
     return this.get('isActive') && !(turf.inside(this.get('mixer.locationPoint'), this.get('attenuationBorder.geometry')))
   }),
 
-  distance: Ember.computed('shape', 'mixer.locationPoint', function() {
+  distance: computed('boundaryLine', 'mixer.locationPoint', function() {
     let coords = this.get('mixer.locationPoint'),
         boundary = this.get('boundaryLine'),
 
@@ -88,7 +106,7 @@ export default Model.extend({
     return turf.distance(closestPoint, coords);
   }),
 
-  attenuation: Ember.computed('shape', 'mixer.locationPoint', function() {
+  attenuation: computed('attenuationBorder', 'mixer.locationPoint', function() {
 
     if (!this.get('isAttenuated')) {
       return 0;

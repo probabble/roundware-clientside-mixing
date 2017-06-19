@@ -1,6 +1,5 @@
 import Ember from 'ember';
 const { Service, inject, computed, observer} = Ember;
-import howler from 'npm:howler';
 import turf from 'npm:@turf/turf';
 // const {Howl} = howler;
 
@@ -24,8 +23,41 @@ export default Service.extend({
     return this.get('location');
   }),
 
+  currentAsset: null,
+
+  readyToPlayNewAsset: computed('currentAsset', function() {
+    return !this.get('currentAsset');
+  }),
+
   playlist: computed.sort('availableAssets', 'playlistSortingRules'),
+
   playlistSortingRules: ['playCount:asc', 'priority:asc', 'distance:asc',],
+
+  playlistControl: observer('readyToPlayNewAsset', 'playlist', function() {
+    let playlist = this.get('playlist');
+    if (!playlist.length) {
+      return
+    }
+    let currentAsset = this.get('currentAsset'),
+        mixer = this;
+
+    if (this.get('readyToPlayNewAsset')) {
+      let asset = playlist.pop();
+      let sound = asset.get('howlerSound');
+      mixer.set('currentAsset', asset);
+
+      sound.once('play', function() {
+        asset.notifyPropertyChange('howlerSound');
+      });
+
+      sound.once('end', function() {
+        asset.notifyPropertyChange('howlerSound');
+        asset.incrementProperty('playCount');
+        mixer.set('currentAsset', null);
+      });
+      sound.play();
+      }
+  }),
 
   availableAssets: computed('nearbyAssets', function() {
     return this.get('nearbyAssets');
@@ -52,7 +84,7 @@ export default Service.extend({
           locationPoint = this.get('locationPoint');
 
       return speakers.filter(speaker => {
-        return turf.inside(locationPoint, speaker.get('geom'));
+        return turf.inside(locationPoint, speaker.get('shape'));
       });
   }),
 
@@ -138,20 +170,17 @@ export default Service.extend({
             console.log('Paused!');
             playingSources.pop(source);
             source.notifyPropertyChange('howlerSound');
-
           },
 
           onstop() {
             console.log('Stopped!');
             playingSources.pop(source);
             source.notifyPropertyChange('howlerSound');
-
           },
 
           onloaderror() {
             console.log("Couldn't Load Source");
             source.notifyPropertyChange('howlerSound');
-
           },
 
           format: ['mp3',]
