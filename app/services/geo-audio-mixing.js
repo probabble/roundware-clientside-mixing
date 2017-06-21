@@ -1,5 +1,6 @@
 import Ember from 'ember';
 const { Service, inject, computed, observer} = Ember;
+import howler from 'npm:howler';
 import turf from 'npm:@turf/turf';
 // const {Howl} = howler;
 
@@ -34,12 +35,12 @@ export default Service.extend({
   playlistSortingRules: ['playCount:asc', 'priority:asc', 'distance:asc',],
 
   playlistControl: observer('readyToPlayNewAsset', 'playlist', function() {
-    let playlist = this.get('playlist');
+    let playlist = this.get('playlist'),
+        mixer = this;
+
     if (!playlist.length) {
       return
     }
-    let currentAsset = this.get('currentAsset'),
-        mixer = this;
 
     if (this.get('readyToPlayNewAsset')) {
       let asset = playlist.pop();

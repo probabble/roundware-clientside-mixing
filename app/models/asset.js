@@ -2,6 +2,7 @@ import DS from 'ember-data';
 const { attr } = DS;
 import Ember from 'ember';
 import turf from 'npm:@turf/turf';
+import howler from 'npm:howler';
 
 export default DS.Model.extend({
 
@@ -35,14 +36,14 @@ export default DS.Model.extend({
   howlerSound: Ember.computed(function() {
 
     // look up the howler sound from the Howler global
-    let sound = window.Howler._howls.filter(howl => {
+    let sound = howler.Howler._howls.filter(howl => {
       return howl.sourceObject === `asset:${this.get('id')}`
     }).get('firstObject');
 
     if (!sound) {
       // if it doesn't already exist, return a new Howler sound
       let source = this;
-      sound = new window.Howl({
+      sound = new howler.Howl({
         src: [source.get('file')],
         // preload: true,
         // html5: true,

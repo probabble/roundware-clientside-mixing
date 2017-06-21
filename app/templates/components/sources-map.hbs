@@ -13,7 +13,7 @@
 
   {{#each geoAudioMixing.speakers as |speaker|}}
     {{layers.geoJSON color="yellow" geoJSON=speaker.attenuationBorder editable=true}}
-    {{layers.geoJSON geoJSON=speaker.shape editable=true
+    {{layers.geoJSON geoJSON=speaker.geoJSON editable=true
                      onDblclick=(action 'toggleEditing' speaker)
                      onEditing=(action 'updateGeom' speaker)}}
     {{layers.geoJSON color="red" geoJSON=speaker.boundaryLine editable=true}}

@@ -1,7 +1,7 @@
 import DS from 'ember-data';
 import Ember from 'ember';
 import turf from 'npm:@turf/turf';
-
+import howler from 'npm:howler';
 const {attr, Model} = DS;
 const {computed, inject} = Ember;
 
@@ -37,17 +37,18 @@ export default Model.extend({
     },
     set(key, value) {
       this.set('shape', value.geometry);
+      return value;
     }
   }),
 
   mixer: inject.service('geoAudioMixing'),
 
-  boundaryLine: computed('shape', function() {
-    let geom = this.get("shape");
+  boundaryLine: computed('geoJSON', function() {
+    let geom = this.get("geoJSON");
     return turf.polygonToLineString(geom);
   }),
 
-  attenuationBorder: computed('shape', 'attenuation_distance', function() {
+  attenuationBorder: computed('geoJSON', 'attenuation_distance', function() {
      let geom = this.get('shape');
      return turf.buffer(geom, this.get('attenuation_distance') * -1, 'meters')
   }),
@@ -68,7 +69,7 @@ export default Model.extend({
   _howlerSound: null,
 
   howlerSound: computed(function() {
-    return window.Howler._howls.filter(howl => {
+    return howler.Howler._howls.filter(howl => {
       return howl.sourceObject === `speaker:${this.get('id')}`
     }).get('firstObject');
   }),

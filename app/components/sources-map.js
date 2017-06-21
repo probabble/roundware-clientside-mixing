@@ -43,6 +43,7 @@ export default Ember.Component.extend({
         location: [location.lat, location.lng]
       });
     },
+
     updateGeom(obj,  e) {
       e.target.eachLayer(layer => {
         obj.set('shape', layer.editor.feature.toGeoJSON().geometry);
@@ -50,14 +51,17 @@ export default Ember.Component.extend({
     },
     toggleEditing(obj, e) {
       e.target.eachLayer(layer => {
-        // if we are exiting the editing state, update the source object
+        if (layer.editEnabled()) {
+            obj.set('geoJSON', layer.editor.feature.toGeoJSON());
+            obj.save();
+        }
         layer.toggleEdit();
-        // layer.on('editable:dragend', function() {
-        //
-        // });
+      });
+        // if we are exiting the editing state, update the source object
+
         // layer.on('editable:editing', function() {
         // });
-      });
+
     },
     notifyEdit(e) {
       e.target.eachLayer(layer => {
